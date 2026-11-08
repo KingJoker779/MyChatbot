@@ -1,9 +1,9 @@
 $ErrorActionPreference = "Stop"
 
 $projectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$outputDirectory = Join-Path $projectRoot "Windows app"
+$outputDirectory = Join-Path $projectRoot "Nova for Windows"
 $executable = Join-Path $outputDirectory "Nova.exe"
-$workDirectory = Join-Path $env:TEMP "mychatbot-pyinstaller-build"
+$workDirectory = Join-Path $env:TEMP "nova-pyinstaller-build"
 $uv = Get-Command uv -ErrorAction SilentlyContinue
 
 if (-not $uv) {
@@ -25,7 +25,7 @@ $arguments = @(
 	"--workpath", $workDirectory,
 	"--specpath", $workDirectory,
 	"--hidden-import", "setup_runtime",
-	(Join-Path $projectRoot "project 1.py")
+	(Join-Path $projectRoot "nova.py")
 )
 
 Push-Location $projectRoot

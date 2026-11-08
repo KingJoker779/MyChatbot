@@ -9,6 +9,6 @@ if ! command -v python3 >/dev/null 2>&1; then
 	exit 1
 fi
 
-echo "Downloading the chatbot's own AI engine and model. This needs internet and about 1 GB of storage."
+echo "Downloading Nova's own AI engine and model. This needs internet and about 1 GB of storage."
 python3 "$SCRIPT_DIR/setup_runtime.py"
-exec "$SCRIPT_DIR/run-chatbot.sh"
+exec "$SCRIPT_DIR/run-nova.sh"

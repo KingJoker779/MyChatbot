@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-	namespace = "com.mychatbot.android"
+	namespace = "com.nova.android"
 	compileSdk = 36
 
 	defaultConfig {
-		applicationId = "com.mychatbot.android"
+		applicationId = "com.nova.android"
 		minSdk = 33
 		targetSdk = 36
 		versionCode = 1

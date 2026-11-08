@@ -19,7 +19,7 @@ than computers.
 1. Install Android Studio from <https://developer.android.com/studio>.
 2. In Android Studio's SDK Manager, install Android SDK Platform 36, Android
    SDK Build-Tools, NDK 29.0.13113456, and CMake 3.31.6.
-3. Double-click **Prepare Android app.bat**. It downloads the pinned llama.cpp
+3. Double-click **Prepare Nova for Android.bat**. It downloads the pinned llama.cpp
    Android library source. This step needs internet.
 4. Open this `android` folder in Android Studio and wait for Gradle sync. If
    prompted, allow Android Studio to install missing SDK components.
@@ -30,8 +30,12 @@ than computers.
    it to install. The phone must run Android 13 (API 33) or newer and have an
    ARM64 or x86-64 processor.
 
-You can also try **Build Android app.bat** after Android Studio and its SDK
+You can also try **Build Nova for Android.bat** after Android Studio and its SDK
 components have been installed.
+
+The Android application ID is `com.nova.android`. Android treats this as a new
+app rather than an update to older `com.mychatbot.android` builds, so the old
+app's private data and downloaded model do not transfer automatically.
 
 ## Download and licensing
 

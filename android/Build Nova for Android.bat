@@ -2,7 +2,7 @@
 setlocal
 cd /d "%~dp0"
 
-call "%~dp0Prepare Android app.bat"
+call "%~dp0Prepare Nova for Android.bat"
 if errorlevel 1 exit /b 1
 
 set "CMAKE_BUILD_PARALLEL_LEVEL=2"

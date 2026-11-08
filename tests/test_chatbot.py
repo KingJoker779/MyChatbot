@@ -16,12 +16,35 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 import setup_runtime
 
-SPEC = importlib.util.spec_from_file_location("chatbot", ROOT / "project 1.py")
+SPEC = importlib.util.spec_from_file_location("chatbot", ROOT / "nova.py")
 chatbot = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(chatbot)
 
 
 class ChatbotRegressionTests(unittest.TestCase):
+	def test_legacy_data_directory_migrates_without_overwriting_new_data(self):
+		with tempfile.TemporaryDirectory() as directory:
+			root = Path(directory)
+			legacy = root / "MyChatbot"
+			current = root / "Nova"
+			legacy.mkdir()
+			(legacy / "bot_history.json").write_text("saved", encoding="utf-8")
+
+			self.assertTrue(chatbot.migrate_legacy_data_directory(legacy, current))
+			self.assertEqual(
+				(current / "bot_history.json").read_text(encoding="utf-8"),
+				"saved",
+			)
+			self.assertFalse(legacy.exists())
+
+			legacy.mkdir()
+			(current / "bot_history.json").write_text("new", encoding="utf-8")
+			self.assertFalse(chatbot.migrate_legacy_data_directory(legacy, current))
+			self.assertEqual(
+				(current / "bot_history.json").read_text(encoding="utf-8"),
+				"new",
+			)
+
 	def test_ping_conversions(self):
 		self.assertIn("67,000 ms is 67 seconds", chatbot.answer_ping_time("67k ms ping"))
 		self.assertIn("1 minute 7 seconds", chatbot.answer_ping_time("67,000 ms latency"))

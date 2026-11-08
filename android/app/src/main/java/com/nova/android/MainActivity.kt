@@ -1,4 +1,4 @@
-package com.mychatbot.android
+package com.nova.android
 
 import android.graphics.Color
 import android.os.Bundle

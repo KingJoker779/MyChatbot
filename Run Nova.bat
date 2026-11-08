@@ -33,5 +33,5 @@ pause
 exit /b 1
 
 :run
-"%PYTHON%" %PYTHON_ARGS% "%~dp0project 1.py"
+"%PYTHON%" %PYTHON_ARGS% "%~dp0nova.py"
 if errorlevel 1 pause

@@ -1,4 +1,4 @@
-"""Download the chatbot's private CPU runtime and local model."""
+"""Download Nova's private CPU runtime and local model."""
 
 import hashlib
 import json
@@ -16,7 +16,10 @@ import zipfile
 
 
 ROOT = Path(
-	os.environ.get("CHATBOT_DATA_DIR", Path(__file__).resolve().parent)
+	os.environ.get(
+		"NOVA_DATA_DIR",
+		os.environ.get("CHATBOT_DATA_DIR", Path(__file__).resolve().parent),
+	)
 ).resolve()
 RUNTIME_DIR = ROOT / "runtime"
 MODEL_DIR = ROOT / "models"
@@ -236,7 +239,7 @@ def install_runtime():
 		return
 	asset_name, url, size, expected_hash = get_runtime_asset()
 	archive_path = RUNTIME_DIR / asset_name
-	print(f"Downloading the chatbot's CPU engine ({asset_name})...")
+	print(f"Downloading Nova's CPU engine ({asset_name})...")
 	download_file(url, archive_path, size)
 	if expected_hash and sha256_file(archive_path) != expected_hash:
 		archive_path.unlink()
@@ -277,7 +280,7 @@ def main():
 	except RuntimeError as error:
 		print(f"Setup failed: {error}", file=sys.stderr)
 		return 1
-	print("Setup complete. The chatbot now has its own local AI engine and model.")
+	print("Setup complete. Nova now has its own local AI engine and model.")
 	return 0
 
 

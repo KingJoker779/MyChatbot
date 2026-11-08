@@ -14,6 +14,6 @@ dependencyResolutionManagement {
 	}
 }
 
-rootProject.name = "NovaAndroid"
+rootProject.name = "Nova"
 include(":app", ":llama")
 project(":llama").projectDir = file("llama.cpp/examples/llama.android/lib")

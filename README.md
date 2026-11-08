@@ -12,7 +12,7 @@ repository.
 | Linux | Python source and setup/run scripts | Source included; no prebuilt Linux binary |
 | macOS | Python source and setup/run scripts | Source included; no prebuilt macOS app |
 | Android | Native app source under [`android`](./android) | Source only; no verified APK included |
-| iOS | Upstream llama.cpp SwiftUI sample under [`ios/AppTemplate`](./ios/AppTemplate) | Prototype only; not yet integrated with this chatbot or verified as a build |
+| iOS | Upstream llama.cpp SwiftUI sample under [`ios/AppTemplate`](./ios/AppTemplate) | Prototype only; not yet integrated with Nova or verified as a build |
 
 The iOS folder is a starting sample, not a finished iOS release of Nova.
 Building it requires a Mac with Xcode and the llama.cpp Apple framework. Details
@@ -20,16 +20,16 @@ and limitations are in [`ios/README.md`](./ios/README.md).
 
 ## Desktop setup
 
-On Windows, run **Setup chatbot.bat**, then **Run chatbot.bat**. To build the
-small Windows EXE, run **Build Windows app.bat**. The EXE does not contain the
+On Windows, run **Setup Nova.bat**, then **Run Nova.bat**. To build the small
+Windows EXE, run **Build Nova for Windows.bat**. The EXE does not contain the
 model or inference engine; the first launch downloads them to the user's local
 application data folder.
 
 On Linux or macOS, install Python 3 and run:
 
 ```sh
-sh setup-chatbot.sh
-sh run-chatbot.sh
+sh setup-nova.sh
+sh run-nova.sh
 ```
 
 The first setup needs internet and about 1 GB of storage. After setup, desktop

@@ -20,17 +20,25 @@ from urllib.request import Request, urlopen
 
 LOCAL_API_URL = "http://127.0.0.1:11435/v1/chat/completions"
 MODEL = "Qwen3.5-0.8B-Q4_K_M"
-DEFAULT_DATA_DIR = (
-	Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local"))
-	/ "MyChatbot"
+LOCAL_APP_DATA_DIR = Path(
+	os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local")
 )
+DEFAULT_DATA_DIR = LOCAL_APP_DATA_DIR / "Nova"
+LEGACY_DEFAULT_DATA_DIR = LOCAL_APP_DATA_DIR / "MyChatbot"
 APP_DATA_DIR = Path(
 	os.environ.get(
-		"CHATBOT_DATA_DIR",
-		str(DEFAULT_DATA_DIR if getattr(sys, "frozen", False) else Path(__file__).resolve().parent),
+		"NOVA_DATA_DIR",
+		os.environ.get(
+			"CHATBOT_DATA_DIR",
+			str(
+				DEFAULT_DATA_DIR
+				if getattr(sys, "frozen", False)
+				else Path(__file__).resolve().parent
+			),
+		),
 	)
 )
-os.environ.setdefault("CHATBOT_DATA_DIR", str(APP_DATA_DIR))
+os.environ.setdefault("NOVA_DATA_DIR", str(APP_DATA_DIR))
 HISTORY_FILE = APP_DATA_DIR / "bot_history.json"
 RUNTIME_DIR = APP_DATA_DIR / "runtime"
 MODEL_DIR = APP_DATA_DIR / "models"
@@ -59,6 +67,30 @@ SYSTEM_PROMPT = (
 LLAMA_PROCESS = None
 
 
+def migrate_legacy_data_directory(source, destination):
+	if destination.exists() or not source.exists():
+		return False
+	try:
+		source.rename(destination)
+	except OSError as error:
+		raise RuntimeError(
+			f"Could not move existing Nova data from {source} to {destination}: {error}"
+		) from error
+	return True
+
+
+def migrate_legacy_app_data():
+	if (
+		os.name == "nt"
+		and getattr(sys, "frozen", False)
+		and APP_DATA_DIR == DEFAULT_DATA_DIR
+	):
+		migrate_legacy_data_directory(
+			LEGACY_DEFAULT_DATA_DIR,
+			DEFAULT_DATA_DIR,
+		)
+
+
 def find_llama_server():
 	server_name = "llama-server.exe" if os.name == "nt" else "llama-server"
 	return next(RUNTIME_DIR.rglob(server_name), None) if RUNTIME_DIR.exists() else None
@@ -83,8 +115,8 @@ def ensure_local_model_ready():
 	projector = MODEL_DIR / "mmproj-F16.gguf"
 	if server is None or not model.is_file() or not projector.is_file():
 		raise RuntimeError(
-			"The chatbot's own AI engine or model is missing. Run "
-			"Setup chatbot.bat or setup-chatbot.sh once."
+			"Nova's AI engine or model is missing. Run "
+			"Setup Nova.bat or setup-nova.sh once."
 		)
 	if LLAMA_PROCESS is not None and LLAMA_PROCESS.poll() is None:
 		try:
@@ -573,6 +605,7 @@ def collect_images():
 
 def main():
 	try:
+		migrate_legacy_app_data()
 		history = load_history()
 	except RuntimeError as error:
 		print(f"Nova: {error}")
