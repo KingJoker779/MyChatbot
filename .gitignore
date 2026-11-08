@@ -2,6 +2,7 @@
 bot_history.json
 /models/
 /runtime/
+/generated_images/
 
 # Python
 __pycache__/

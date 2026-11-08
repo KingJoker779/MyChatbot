@@ -3,6 +3,7 @@
 import base64
 import atexit
 from difflib import SequenceMatcher
+import getpass
 import importlib
 import json
 import math
@@ -14,9 +15,11 @@ import subprocess
 import sys
 import threading
 import time
+import uuid
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
+import webbrowser
 
 LOCAL_API_URL = "http://127.0.0.1:11435/v1/chat/completions"
 MODEL = "Qwen3.5-0.8B-Q4_K_M"
@@ -43,6 +46,11 @@ HISTORY_FILE = APP_DATA_DIR / "bot_history.json"
 RUNTIME_DIR = APP_DATA_DIR / "runtime"
 MODEL_DIR = APP_DATA_DIR / "models"
 SERVER_LOG = RUNTIME_DIR / "llama-server.log"
+GENERATED_IMAGES_DIR = APP_DATA_DIR / "generated_images"
+IMAGE_API_URL = (
+	"https://generativelanguage.googleapis.com/v1beta/models/"
+	"gemini-2.5-flash-image:generateContent"
+)
 KEEP_RECENT_MESSAGES = 4
 RELEVANT_OLD_MESSAGES = 3
 RELEVANT_MESSAGE_CHARS = 220
@@ -179,6 +187,25 @@ def stop_local_model():
 		except subprocess.TimeoutExpired:
 			LLAMA_PROCESS.kill()
 			LLAMA_PROCESS.wait()
+
+
+def ensure_local_setup():
+	server = find_llama_server()
+	model = MODEL_DIR / "Qwen3.5-0.8B-Q4_K_M.gguf"
+	projector = MODEL_DIR / "mmproj-F16.gguf"
+	if server is not None and model.is_file() and projector.is_file():
+		return True
+
+	print("First-time setup: downloading the local AI engine and model (~740 MB).")
+	print("This needs internet and about 1 GB of free storage.")
+	try:
+		setup_runtime = importlib.import_module("setup_runtime")
+		if setup_runtime.main() != 0:
+			return False
+	except (ImportError, OSError, RuntimeError) as error:
+		print(f"Nova: First-time setup failed: {error}")
+		return False
+	return True
 
 
 def request_chat(messages, images=None, stream=False):
@@ -338,6 +365,113 @@ def request_chat(messages, images=None, stream=False):
 			with status_lock:
 				if status_visible:
 					print("\r" + " " * 24 + "\r", end="", flush=True)
+
+
+def is_image_generation_request(message):
+	return bool(
+		re.search(
+			r"\b(?:make|create|generate|draw|paint|design)\b.{0,80}"
+			r"\b(?:image|picture|photo|illustration|artwork|logo|wallpaper|portrait)\b"
+			r"|\b(?:image|picture|photo|illustration|artwork|logo|wallpaper|portrait)\b"
+			r"\s+of\b",
+			message,
+			re.IGNORECASE | re.DOTALL,
+		)
+	)
+
+
+def generate_image(prompt, api_key):
+	if not api_key or not api_key.strip():
+		raise RuntimeError(
+			"Image creation needs your own Google AI Studio API key. "
+			"Get one at https://aistudio.google.com/apikey."
+		)
+	if len(prompt) > 4000:
+		raise RuntimeError("Image prompts must be 4,000 characters or fewer.")
+
+	payload = {
+		"contents": [{"parts": [{"text": prompt}]}],
+		"generationConfig": {"responseModalities": ["TEXT", "IMAGE"]},
+	}
+	request = Request(
+		IMAGE_API_URL,
+		data=json.dumps(payload).encode("utf-8"),
+		headers={
+			"Content-Type": "application/json",
+			"x-goog-api-key": api_key.strip(),
+		},
+		method="POST",
+	)
+	try:
+		with urlopen(request, timeout=180) as response:
+			data = json.loads(response.read().decode("utf-8"))
+	except HTTPError as error:
+		details = error.read().decode("utf-8", "replace").strip()
+		try:
+			error_data = json.loads(details)
+			details = error_data.get("error", {}).get("message", details)
+		except (json.JSONDecodeError, AttributeError):
+			pass
+		raise RuntimeError(
+			f"Google image generation returned HTTP {error.code}: "
+			f"{details or error.reason}"
+		) from error
+	except (URLError, TimeoutError) as error:
+		raise RuntimeError(f"Could not connect to Google image generation: {error}") from error
+	except (UnicodeDecodeError, json.JSONDecodeError) as error:
+		raise RuntimeError("Google image generation returned invalid JSON.") from error
+
+	if not isinstance(data, dict):
+		raise RuntimeError("Google image generation returned an invalid response.")
+	candidates = data.get("candidates")
+	if not isinstance(candidates, list):
+		error = data.get("error", {})
+		message = error.get("message") if isinstance(error, dict) else None
+		raise RuntimeError(message or "Google did not return an image.")
+	for candidate in candidates:
+		if not isinstance(candidate, dict):
+			continue
+		content = candidate.get("content")
+		parts = content.get("parts") if isinstance(content, dict) else None
+		if not isinstance(parts, list):
+			continue
+		for part in parts:
+			if not isinstance(part, dict):
+				continue
+			image_data = part.get("inlineData", part.get("inline_data"))
+			if not isinstance(image_data, dict):
+				continue
+			mime_type = image_data.get("mimeType", image_data.get("mime_type"))
+			encoded = image_data.get("data")
+			if mime_type not in {"image/png", "image/jpeg", "image/webp"}:
+				continue
+			if not isinstance(encoded, str):
+				continue
+			try:
+				image_bytes = base64.b64decode(encoded, validate=True)
+			except (ValueError, base64.binascii.Error) as error:
+				raise RuntimeError("Google returned invalid image data.") from error
+			if image_bytes:
+				return mime_type, image_bytes
+	raise RuntimeError("Google's response did not contain a generated image.")
+
+
+def save_generated_image(mime_type, image_bytes):
+	extensions = {
+		"image/png": ".png",
+		"image/jpeg": ".jpg",
+		"image/webp": ".webp",
+	}
+	extension = extensions.get(mime_type)
+	if extension is None:
+		raise RuntimeError("Google returned an unsupported image format.")
+	try:
+		GENERATED_IMAGES_DIR.mkdir(parents=True, exist_ok=True)
+		image_path = GENERATED_IMAGES_DIR / f"nova-{uuid.uuid4().hex}{extension}"
+		image_path.write_bytes(image_bytes)
+	except OSError as error:
+		raise RuntimeError(f"Could not save the generated picture: {error}") from error
+	return image_path
 
 
 def load_history():
@@ -611,25 +745,7 @@ def main():
 		print(f"Nova: {error}")
 		return
 
-	server = find_llama_server()
-	model = MODEL_DIR / "Qwen3.5-0.8B-Q4_K_M.gguf"
-	projector = MODEL_DIR / "mmproj-F16.gguf"
-	if server is None or not model.is_file() or not projector.is_file():
-		print("First-time setup: downloading the AI engine and model (~740 MB).")
-		print("This needs internet and about 1 GB of free storage.")
-		try:
-			setup_runtime = importlib.import_module("setup_runtime")
-			if setup_runtime.main() != 0:
-				if getattr(sys, "frozen", False):
-					input("Setup failed. Press Enter to close.")
-				return
-		except (ImportError, OSError, RuntimeError) as error:
-			print(f"Nova: First-time setup failed: {error}")
-			if getattr(sys, "frozen", False):
-				input("Press Enter to close.")
-			return
-
-	print(f"Nova: Ready. Running {MODEL} locally; no API key or usage bill.")
+	print(f"Nova: Local text chat uses {MODEL}; image creation uses Google's online service.")
 	print("Nova: Ask me about any topic. Type /image to add photos, /clear to forget this chat, or /quit to exit.")
 	print("Nova: Chat history stays on this PC; older messages are searched for relevant context.")
 
@@ -670,7 +786,33 @@ def main():
 
 		history.append({"role": "user", "content": message})
 		reply = None
-		if not images:
+		generate_picture = not images and is_image_generation_request(message)
+		if generate_picture:
+			image_api_key = os.environ.get("GEMINI_API_KEY", "").strip()
+			if not image_api_key:
+				try:
+					image_api_key = getpass.getpass(
+						"Google AI Studio API key (input hidden): "
+					).strip()
+				except (EOFError, KeyboardInterrupt):
+					print("\nNova: Image creation cancelled.")
+					history.pop()
+					continue
+			if not image_api_key:
+				print("Nova: No image API key entered; image creation cancelled.")
+				history.pop()
+				continue
+			print("Nova: Creating your picture...")
+			try:
+				mime_type, image_bytes = generate_image(message, image_api_key)
+				image_path = save_generated_image(mime_type, image_bytes)
+				reply = f"Picture saved to: {image_path}"
+				webbrowser.open(image_path.as_uri())
+			except (RuntimeError, ValueError, OSError) as error:
+				history.pop()
+				print(f"Nova: Image creation failed: {error}")
+				continue
+		if not images and not generate_picture:
 			reply = answer_greeting(message)
 			if reply is None:
 				reply = answer_ping_time(message)
@@ -678,6 +820,9 @@ def main():
 				reply = answer_roblox_game(message)
 
 		if reply is None:
+			if not ensure_local_setup():
+				history.pop()
+				continue
 			try:
 				reply = request_chat(
 					build_messages(history),

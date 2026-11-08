@@ -2,14 +2,27 @@
 
 [**Download the latest Nova APK**](https://github.com/KingJoker779/Nova/releases/latest/download/Nova.apk)
 
-Nova is a local AI chatbot. The Android app uses llama.cpp inside the app and
-the same small Qwen 3.5 0.8B model as the desktop chatbot. It does not require
-Ollama or another chatbot app.
+Nova uses llama.cpp inside the app for local text chat and the same small Qwen
+3.5 0.8B model as the desktop chatbot. It does not require Ollama or another
+chatbot app.
 
-The app is text-chat only for now. On first launch, tap **Download AI model**
-to download about 533 MB over the internet; Wi-Fi is recommended. The model
-stays in the app's private storage. After setup, ordinary replies are generated
-on the phone without an internet connection or an AI service account.
+To create pictures, tap **Image settings** and enter your own Google AI Studio
+API key, then ask Nova to draw or make an image. Nova sends the image prompt to
+Google and displays the returned picture in the chat. The key stays in memory
+for the current app session and is not saved. Image creation requires internet
+and is subject to Google's availability, rate limits, and any applicable
+charges; it is not guaranteed to be unlimited or free.
+
+For regular text chat, tap **Download text AI** to download about 533 MB over
+the internet; Wi-Fi is recommended. The model stays in the app's private
+storage. After setup, ordinary text replies are generated on the phone without
+an internet connection or an AI service account.
+
+The download runs as an Android foreground service, so it can continue if you
+switch apps or lock the screen. Nova asks for notification permission so
+Android can show download progress. If notifications are denied, Nova explains
+the available choices before starting. Keep the tablet connected to Wi-Fi and
+plugged in for the large first download.
 
 The model is a small general-purpose assistant. It can help across many topics,
 but no AI can answer literally everything, and this local model can make
@@ -18,8 +31,11 @@ than computers.
 
 To install the APK, download it to an Android 13 or newer phone and open the
 downloaded file. If Android asks, allow your browser or file manager to install
-unknown apps, then follow the installation prompt. The app's first launch
-downloads its approximately 533 MB AI model; Wi-Fi is recommended.
+unknown apps, then follow the installation prompt.
+
+Get an API key from <https://aistudio.google.com/apikey>. Never share your key
+or put it in a public release. Each tester needs their own key for image
+generation.
 
 ## Build the app on Windows
 

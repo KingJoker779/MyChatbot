@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 struct Model: Identifiable {
     var id = UUID()
@@ -119,9 +120,9 @@ class LlamaState: ObservableObject {
     }
 
 
-    func complete(text: String) async {
+    func complete(text: String) async -> String {
         guard let llamaContext else {
-            return
+            return ""
         }
 
         let t_start = DispatchTime.now().uptimeNanoseconds
@@ -129,11 +130,13 @@ class LlamaState: ObservableObject {
         let t_heat_end = DispatchTime.now().uptimeNanoseconds
         let t_heat = Double(t_heat_end - t_start) / NS_PER_S
 
-        messageLog += "\(text)"
+        messageLog += "You: \(text)\nNova: "
 
-        Task.detached {
+        return await Task.detached { () -> String in
+            var generatedText = ""
             while await !llamaContext.is_done {
                 let result = await llamaContext.completion_loop()
+                generatedText += result
                 await MainActor.run {
                     self.messageLog += "\(result)"
                 }
@@ -148,12 +151,11 @@ class LlamaState: ObservableObject {
             await MainActor.run {
                 self.messageLog += """
                     \n
-                    Done
-                    Heat up took \(t_heat)s
-                    Generated \(tokens_per_second) t/s\n
+                    Generated \(tokens_per_second) tokens/s\n
                     """
             }
-        }
+            return generatedText
+        }.value
     }
 
     func bench() async {

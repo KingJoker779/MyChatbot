@@ -1,9 +1,21 @@
-# llama.cpp/examples/llama.swiftui
+# Nova for iOS (prototype)
 
-Local inference of llama.cpp on an iPhone. This is a sample app that can be used as a starting
-point for more advanced projects.
+This SwiftUI prototype has Nova chat, local GGUF text-model support through
+llama.cpp, and online image generation through Google's Gemini image API.
+Image generation requires each user to provide their own Google AI Studio API
+key in Image settings. Prompts are sent to Google; availability, limits, and
+charges depend on the user's Google account.
 
-For usage instructions and performance stats, check the following discussion: https://github.com/ggml-org/llama.cpp/discussions/4508
+Model downloads use a background `URLSession`, so iOS can continue a transfer
+after the app is suspended. iOS does not require notification permission for
+the transfer itself. A force-quit by the user can stop background work.
+
+The local model library and model picker are still based on the upstream
+llama.cpp sample; this is not yet a complete cross-platform Nova release.
+Building requires macOS, Xcode, and a llama.cpp `llama.xcframework`.
+
+For upstream usage instructions and performance stats, see
+<https://github.com/ggml-org/llama.cpp/discussions/4508>.
 
 
 ### Building

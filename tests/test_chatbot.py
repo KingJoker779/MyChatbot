@@ -240,6 +240,60 @@ class ChatbotRegressionTests(unittest.TestCase):
 		payload = json.loads(open_url.call_args.args[0].data)
 		self.assertEqual(payload["messages"][-1]["content"][1]["type"], "image_url")
 
+	def test_image_generation_request_detection(self):
+		for prompt in (
+			"Make me a picture of a red dragon",
+			"Please draw an image of a forest",
+			"Generate a photo of a puppy",
+		):
+			with self.subTest(prompt=prompt):
+				self.assertTrue(chatbot.is_image_generation_request(prompt))
+		self.assertFalse(chatbot.is_image_generation_request("What is in this photo?"))
+
+	def test_image_generation_parses_google_image_response(self):
+		image_bytes = b"example image bytes"
+		response_body = {
+			"candidates": [{
+				"content": {
+					"parts": [
+						{"text": "Here is your image."},
+						{
+							"inlineData": {
+								"mimeType": "image/png",
+								"data": chatbot.base64.b64encode(image_bytes).decode("ascii"),
+							},
+						},
+					],
+				},
+			}],
+		}
+		response = BytesIO(json.dumps(response_body).encode("utf-8"))
+		with patch.object(chatbot, "urlopen", return_value=response) as open_url:
+			mime_type, generated = chatbot.generate_image("Draw a red dragon", "test-key")
+
+		self.assertEqual(mime_type, "image/png")
+		self.assertEqual(generated, image_bytes)
+		request = open_url.call_args.args[0]
+		self.assertEqual(request.get_header("X-goog-api-key"), "test-key")
+		self.assertEqual(json.loads(request.data)["generationConfig"]["responseModalities"], ["TEXT", "IMAGE"])
+
+	def test_image_generation_requires_key_and_valid_image(self):
+		with self.assertRaisesRegex(RuntimeError, "API key"):
+			chatbot.generate_image("Draw a cat", "")
+
+		response = BytesIO(json.dumps({"candidates": [{"content": {"parts": [{"text": "No image"}]}}]}).encode())
+		with patch.object(chatbot, "urlopen", return_value=response):
+			with self.assertRaisesRegex(RuntimeError, "did not contain"):
+				chatbot.generate_image("Draw a cat", "test-key")
+
+	def test_generated_images_are_saved_with_matching_extension(self):
+		with tempfile.TemporaryDirectory() as directory:
+			with patch.object(chatbot, "GENERATED_IMAGES_DIR", Path(directory)):
+				image_path = chatbot.save_generated_image("image/png", b"picture")
+
+			self.assertEqual(image_path.suffix, ".png")
+			self.assertEqual(image_path.read_bytes(), b"picture")
+
 	def test_malformed_stream_events_raise_controlled_error(self):
 		events = (
 			{"choices": [{"delta": None}]},
