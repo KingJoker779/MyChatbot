@@ -2,7 +2,7 @@ $ErrorActionPreference = "Stop"
 
 $projectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $outputDirectory = Join-Path $projectRoot "Windows app"
-$executable = Join-Path $outputDirectory "MyChatbot.exe"
+$executable = Join-Path $outputDirectory "Nova.exe"
 $workDirectory = Join-Path $env:TEMP "mychatbot-pyinstaller-build"
 $uv = Get-Command uv -ErrorAction SilentlyContinue
 
@@ -20,7 +20,7 @@ $arguments = @(
 	"--clean",
 	"--onefile",
 	"--console",
-	"--name", "MyChatbot",
+	"--name", "Nova",
 	"--distpath", $outputDirectory,
 	"--workpath", $workDirectory,
 	"--specpath", $workDirectory,

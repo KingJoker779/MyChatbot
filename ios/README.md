@@ -1,7 +1,7 @@
 # iOS status
 
 `AppTemplate` is the upstream llama.cpp SwiftUI example, not a completed iOS
-version of My Chatbot. It has not been adapted to use this project's model,
+version of Nova. It has not been adapted to use this project's model,
 prompt, or chat-history behavior, and it has not been built or tested here.
 Do not present it as a tested iOS release.
 

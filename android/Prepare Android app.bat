@@ -7,5 +7,5 @@ if errorlevel 1 (
 	exit /b 1
 )
 echo.
-echo Next, open this folder in Android Studio to build and install My Chatbot.
+echo Next, open this folder in Android Studio to build and install Nova.
 pause

@@ -1,6 +1,6 @@
-# My Chatbot
+# Nova
 
-A small, local-first chatbot project for desktop and Android. The model and
+A small, local-first chatbot for desktop and Android. The model and
 inference engine are downloaded separately; they are not stored in this
 repository.
 
@@ -14,7 +14,7 @@ repository.
 | Android | Native app source under [`android`](./android) | Source only; no verified APK included |
 | iOS | Upstream llama.cpp SwiftUI sample under [`ios/AppTemplate`](./ios/AppTemplate) | Prototype only; not yet integrated with this chatbot or verified as a build |
 
-The iOS folder is a starting sample, not a finished iOS release of My Chatbot.
+The iOS folder is a starting sample, not a finished iOS release of Nova.
 Building it requires a Mac with Xcode and the llama.cpp Apple framework. Details
 and limitations are in [`ios/README.md`](./ios/README.md).
 

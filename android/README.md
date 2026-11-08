@@ -1,8 +1,8 @@
-# My Chatbot for Android
+# Nova for Android
 
-This is the Android app version of the local chatbot. It uses llama.cpp inside
-the app and the same small Qwen 3.5 0.8B model as the desktop chatbot. It does
-not require Ollama or another chatbot app.
+Nova is a local AI chatbot. The Android app uses llama.cpp inside the app and
+the same small Qwen 3.5 0.8B model as the desktop chatbot. It does not require
+Ollama or another chatbot app.
 
 The app is text-chat only for now. On first launch, tap **Download AI model**
 to download about 533 MB over the internet; Wi-Fi is recommended. The model

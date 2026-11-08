@@ -248,7 +248,7 @@ class MainActivity : AppCompatActivity() {
 			val connection = URL(MODEL_URL).openConnection() as HttpURLConnection
 			connection.connectTimeout = 30_000
 			connection.readTimeout = 120_000
-			connection.setRequestProperty("User-Agent", "MyChatbot-Android/1.0")
+			connection.setRequestProperty("User-Agent", "Nova-Android/1.0")
 			try {
 				if (connection.responseCode !in 200..299) {
 					throw IOException("Model download failed (HTTP ${connection.responseCode}).")
@@ -308,13 +308,13 @@ class MainActivity : AppCompatActivity() {
 
 		messageInput.text.clear()
 		if (STANDALONE_GREETING.matches(question)) {
-			transcript.append("\n\nYou: $question\n\nBot: Hey! How can I help?\n")
+			transcript.append("\n\nYou: $question\n\nNova: Hey! How can I help?\n")
 			scrollToBottom()
 			return
 		}
 		val pingAnswer = answerPingTime(question)
 		if (pingAnswer != null) {
-			transcript.append("\n\nYou: $question\n\nBot: $pingAnswer\n")
+			transcript.append("\n\nYou: $question\n\nNova: $pingAnswer\n")
 			scrollToBottom()
 			return
 		}
@@ -322,7 +322,7 @@ class MainActivity : AppCompatActivity() {
 		busy = true
 		messageInput.isEnabled = false
 		sendButton.isEnabled = false
-		transcript.append("\n\nYou: $question\n\nBot: ")
+		transcript.append("\n\nYou: $question\n\nNova: ")
 		val answerStart = transcript.text.length
 		transcript.append("Thinking...")
 		scrollToBottom()

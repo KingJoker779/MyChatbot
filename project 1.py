@@ -276,7 +276,7 @@ def request_chat(messages, images=None, stream=False):
 							if status_visible:
 								print("\r" + " " * 24 + "\r", end="", flush=True)
 								status_visible = False
-							print("Bot: ", end="", flush=True)
+							print("Nova: ", end="", flush=True)
 							response_started = True
 						print(text, end="", flush=True)
 					parts.append(text)
@@ -562,12 +562,12 @@ def collect_images():
 		try:
 			content_type, _ = mimetypes.guess_type(path.name)
 			if content_type not in {"image/jpeg", "image/png", "image/webp"}:
-				print("Bot: Please choose a JPEG, PNG, or WebP photo.")
+				print("Nova: Please choose a JPEG, PNG, or WebP photo.")
 				continue
 			image_data = base64.b64encode(path.read_bytes()).decode("ascii")
 			images.append(f"data:{content_type};base64,{image_data}")
 		except OSError as error:
-			print(f"Bot: Can't read that photo: {error}")
+			print(f"Nova: Can't read that photo: {error}")
 	return images
 
 
@@ -575,7 +575,7 @@ def main():
 	try:
 		history = load_history()
 	except RuntimeError as error:
-		print(f"Bot: {error}")
+		print(f"Nova: {error}")
 		return
 
 	server = find_llama_server()
@@ -591,33 +591,33 @@ def main():
 					input("Setup failed. Press Enter to close.")
 				return
 		except (ImportError, OSError, RuntimeError) as error:
-			print(f"Bot: First-time setup failed: {error}")
+			print(f"Nova: First-time setup failed: {error}")
 			if getattr(sys, "frozen", False):
 				input("Press Enter to close.")
 			return
 
-	print(f"Bot: Ready. Running {MODEL} locally; no API key or usage bill.")
-	print("Bot: Ask me about any topic. Type /image to add photos, /clear to forget this chat, or /quit to exit.")
-	print("Bot: Chat history stays on this PC; older messages are searched for relevant context.")
+	print(f"Nova: Ready. Running {MODEL} locally; no API key or usage bill.")
+	print("Nova: Ask me about any topic. Type /image to add photos, /clear to forget this chat, or /quit to exit.")
+	print("Nova: Chat history stays on this PC; older messages are searched for relevant context.")
 
 	while True:
 		try:
 			message = input("You: ").strip()
 		except (EOFError, KeyboardInterrupt):
-			print("\nBot: Goodbye!")
+			print("\nNova: Goodbye!")
 			break
 
 		if message.lower() in {"/quit", "quit", "exit", "bye"}:
-			print("Bot: Goodbye!")
+			print("Nova: Goodbye!")
 			break
 		if message.lower() == "/clear":
 			history = []
 			try:
 				save_history(history)
 			except RuntimeError as error:
-				print(f"Bot: {error}")
+				print(f"Nova: {error}")
 			else:
-				print("Bot: Chat history cleared.")
+				print("Nova: Chat history cleared.")
 			continue
 
 		images = collect_images() if message.lower() == "/image" else []
@@ -653,17 +653,17 @@ def main():
 				)
 			except (RuntimeError, ValueError, KeyError) as error:
 				history.pop()
-				print(f"\nBot: Request failed: {error}")
+				print(f"\nNova: Request failed: {error}")
 				continue
 			print()
 		else:
-			print(f"Bot: {reply}")
+			print(f"Nova: {reply}")
 
 		history.append({"role": "assistant", "content": reply})
 		try:
 			save_history(history)
 		except RuntimeError as error:
-			print(f"Bot: {error}")
+			print(f"Nova: {error}")
 
 
 if __name__ == "__main__":

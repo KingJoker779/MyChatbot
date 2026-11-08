@@ -14,6 +14,6 @@ dependencyResolutionManagement {
 	}
 }
 
-rootProject.name = "MyChatbotAndroid"
+rootProject.name = "NovaAndroid"
 include(":app", ":llama")
 project(":llama").projectDir = file("llama.cpp/examples/llama.android/lib")
