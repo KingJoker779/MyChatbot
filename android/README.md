@@ -1,5 +1,7 @@
 # Nova for Android
 
+[**Download the latest Nova APK**](https://github.com/KingJoker779/Nova/releases/latest/download/Nova.apk)
+
 Nova is a local AI chatbot. The Android app uses llama.cpp inside the app and
 the same small Qwen 3.5 0.8B model as the desktop chatbot. It does not require
 Ollama or another chatbot app.
@@ -13,6 +15,11 @@ The model is a small general-purpose assistant. It can help across many topics,
 but no AI can answer literally everything, and this local model can make
 mistakes or lack current information. Phones may generate replies more slowly
 than computers.
+
+To install the APK, download it to an Android 13 or newer phone and open the
+downloaded file. If Android asks, allow your browser or file manager to install
+unknown apps, then follow the installation prompt. The app's first launch
+downloads its approximately 533 MB AI model; Wi-Fi is recommended.
 
 ## Build the app on Windows
 

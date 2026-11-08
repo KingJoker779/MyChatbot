@@ -1,5 +1,7 @@
 # Nova
 
+[**Download the Nova Android APK**](https://github.com/KingJoker779/Nova/releases/latest/download/Nova.apk) · [Other downloads](https://github.com/KingJoker779/Nova/releases/latest)
+
 A small, local-first chatbot for desktop and Android. The model and
 inference engine are downloaded separately; they are not stored in this
 repository.
@@ -11,7 +13,7 @@ repository.
 | Windows | Python source, setup scripts, and a script to build a small EXE | Source/build scripts included; the model downloads on first run |
 | Linux | Python source and setup/run scripts | Source included; no prebuilt Linux binary |
 | macOS | Python source and setup/run scripts | Source included; no prebuilt macOS app |
-| Android | Native app source under [`android`](./android) | Source only; no verified APK included |
+| Android | Native app source under [`android`](./android) and APK on the [Releases page](https://github.com/KingJoker779/Nova/releases/latest) | APK built automatically for tagged releases |
 | iOS | Upstream llama.cpp SwiftUI sample under [`ios/AppTemplate`](./ios/AppTemplate) | Prototype only; not yet integrated with Nova or verified as a build |
 
 The iOS folder is a starting sample, not a finished iOS release of Nova.
@@ -38,10 +40,13 @@ information.
 
 ## Android
 
-See [`android/README.md`](./android/README.md) for the Android Studio, SDK, NDK,
-and build instructions. The project downloads its pinned llama.cpp source when
-prepared. The app downloads its model on first launch. Android source is
-included, but an APK has not been verified for this repository.
+Download [Nova.apk](https://github.com/KingJoker779/Nova/releases/latest/download/Nova.apk)
+from the latest GitHub release, open it on an Android 13 or newer phone, and
+follow Android's prompts to install it. The app supports ARM64 and x86-64
+phones. The first launch downloads its 533 MB AI model; Wi-Fi is recommended.
+
+See [`android/README.md`](./android/README.md) for Android Studio and source
+build instructions.
 
 ## Tests
 
