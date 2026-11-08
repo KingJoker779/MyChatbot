@@ -1,0 +1,28 @@
+# Local conversation and downloaded AI assets
+bot_history.json
+/models/
+/runtime/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Android/Gradle generated files
+.gradle/
+**/build/
+**/.cxx/
+android/llama.cpp/
+android/local.properties
+android/.kotlin/
+
+# Xcode generated files
+**/DerivedData/
+**/xcuserdata/
+**/*.xcuserstate
+
+# Local archives and build output
+*.download.zip
+*.zip
+*.exe
